@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f5f5f7">
+
+<title>Controle de Clientes</title>
+
+<!-- Biblioteca para exportar Excel -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:#f5f5f7;
+color:#111;
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif
+}
+
+main{
+max-width:620px;
+margin:auto;
+padding:28px 18px 40px
+}
+
+h1{
+font-size:30px;
+margin:4px 0 22px;
+font-weight:750
+}
+
+.card{
+background:#fff;
+border-radius:18px;
+padding:18px;
+margin-bottom:18px;
+box-shadow:0 2px 12px #0000000d
+}
+
+label{
+font-size:14px;
+color:#666;
+font-weight:600;
+display:block
+}
+
+input{
+width:100%;
+margin-top:8px;
+padding:15px;
+border:1px solid #d6d6da;
+border-radius:12px;
+font-size:20px;
+letter-spacing:4px;
+outline:none
+}
+
+input:focus{
+border-color:#111
+}
+
+#valor{
+letter-spacing:0;
+margin-bottom:10px
+}
+
+button{
+border:0;
+border-radius:12px;
+padding:14px 18px;
+font-size:16px;
+font-weight:700;
+cursor:pointer
+}
+
+.primary{
+width:100%;
+margin-top:12px;
+background:#111;
+color:white
+}
+
+h2{
+font-size:19px;
+margin:8px 0 12px
+}
+
+.item{
+border:1px solid #e5e5e7;
+border-radius:14px;
+padding:14px;
+margin:9px 0;
+display:flex;
+justify-content:space-between;
+gap:12px;
+align-items:center
+}
+
+.code{
+font-size:21px;
+font-weight:750;
+letter-spacing:2px
+}
+
+.meta{
+font-size:13px;
+color:#666;
+margin-top:5px;
+line-height:1.55
+}
+
+.badge{
+font-size:12px;
+font-weight:700;
+padding:7px 9px;
+border-radius:999px;
+background:#eef7ed;
+color:#287528;
+white-space:nowrap
+}
+
+.late .badge{
+background:#fff0f0;
+color:#b3261e
+}
+
+.completed .badge{
+background:#eef0ff;
+color:#3849a8
+}
+
+.delete{
+background:#eee;
+color:#333;
+font-size:13px;
+padding:8px 10px;
+margin-top:8px
+}
+
+.complete{
+background:#111;
+color:white;
+font-size:13px;
+padding:8px 10px;
+margin-top:8px
+}
+
+.empty{
+color:#777;
+text-align:center;
+padding:16px 4px;
+font-size:14px
+}
+
+.note{
+font-size:12px;
+color:#777;
+margin-top:12px;
+text-align:center
+}
+
+.money{
+font-size:30px;
+font-weight:800;
+margin:5px 0 18px
+}
+
+.stats{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px
+}
+
+.stat{
+background:#f5f5f7;
+border-radius:14px;
+padding:14px
+}
+
+.stat-title{
+font-size:12px;
+color:#777;
+margin-bottom:5px
+}
+
+.stat-value{
+font-size:22px;
+font-weight:800
+}
+
+.export-buttons{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px
+}
+
+.export-buttons button{
+font-size:14px;
+background:#eee
+}
+
+.import-label{
+display:block;
+background:#111;
+color:white;
+text-align:center;
+padding:14px 18px;
+border-radius:12px;
+font-size:14px;
+font-weight:700;
+cursor:pointer
+}
+
+#importFile{
+display:none
+}
+
+hr{
+border:0;
+border-top:1px solid #eee;
+margin:18px 0
+}
+
+@media(max-width:430px){
+.item{
+align-items:flex-start
+}
+
+.badge{
+font-size:11px
+}
+
+.stats{
+grid-template-columns:1fr 1fr
+}
+}
+</style>
+</head>
+
+<body>
+
+<main>
+
+<h1>Controle de Clientes</h1>
+
+<!-- CADASTRO -->
+<section class="card">
+
+<label for="codigo">
+Código do cliente — 4 números
+</label>
+
+<input
+id="codigo"
+inputmode="numeric"
+maxlength="4"
+placeholder="0000"
+autocomplete="off"
+>
+
+<label for="valor" style="margin-top:14px">
+Quanto o cliente pagou?
+</label>
+
+<input
+id="valor"
+inputmode="decimal"
+placeholder="R$ 0,00"
+autocomplete="off"
+>
+
+<button class="primary" onclick="cadastrar()">
+CADASTRAR
+</button>
+
+<div class="note">
+O prazo de 10 dias é calculado automaticamente.
+</div>
+
+</section>
+
+
+<!-- FINANCEIRO -->
+<section class="card">
+
+<h2>Financeiro</h2>
+
+<div class="money" id="totalGeral">
+R$ 0,00
+</div>
+
+<div class="stats">
+
+<div class="stat">
+<div class="stat-title">Hoje</div>
+<div class="stat-value" id="valorHoje">R$ 0,00</div>
+</div>
+
+<div class="stat">
+<div class="stat-title">Esta semana</div>
+<div class="stat-value" id="valorSemana">R$ 0,00</div>
+</div>
+
+<div class="stat">
+<div class="stat-title">Este mês</div>
+<div class="stat-value" id="valorMes">R$ 0,00</div>
+</div>
+
+<div class="stat">
+<div class="stat-title">Clientes</div>
+<div class="stat-value" id="totalClientes">0</div>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ANÁLISES -->
+<section class="card">
+
+<h2>Análises</h2>
+
+<div class="stats">
+
+<div class="stat">
+<div class="stat-title">Clientes hoje</div>
+<div class="stat-value" id="clientesHoje">0</div>
+</div>
+
+<div class="stat">
+<div class="stat-title">Clientes na semana</div>
+<div class="stat-value" id="clientesSemana">0</div>
+</div>
+
+<div class="stat">
+<div class="stat-title">Clientes no mês</div>
+<div class="stat-value" id="clientesMes">0</div>
+</div>
+
+<div class="stat">
+<div class="stat-title">Melhor dia do mês</div>
+<div class="stat-value" id="melhorDia">-</div>
+</div>
+
+<div class="stat">
+<div class="stat-title">Pior dia do mês</div>
+<div class="stat-value" id="piorDia">-</div>
+</div>
+
+<div class="stat">
+<div class="stat-title">Média por dia</div>
+<div class="stat-value" id="mediaDia">0</div>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ATIVOS -->
+<section class="card">
+
+<h2>
+🟢 ATIVOS
+<span id="countAtivos"></span>
+</h2>
+
+<div id="ativos"></div>
+
+</section>
+
+
+<!-- ATRASADOS -->
+<section class="card">
+
+<h2>
+🔴 ATRASADOS
+<span id="countAtrasados"></span>
+</h2>
+
+<div id="atrasados"></div>
+
+</section>
+
+
+<!-- CONCLUÍDOS -->
+<section class="card">
+
+<h2>
+🔵 CONCLUÍDOS
+<span id="countConcluidos"></span>
+</h2>
+
+<div id="concluidos"></div>
+
+</section>
+
+
+<!-- BACKUP -->
+<section class="card">
+
+<h2>Dados e Backup</h2>
+
+<div class="export-buttons">
+
+<button onclick="exportarExcel()">
+EXPORTAR EXCEL
+</button>
+
+<button onclick="exportarBackup()">
+EXPORTAR BACKUP
+</button>
+
+</div>
+
+<hr>
+
+<label class="import-label" for="importFile">
+IMPORTAR BACKUP
+</label>
+
+<input
+type="file"
+id="importFile"
+accept=".json"
+onchange="importarBackup(event)"
+>
+
+<div class="note">
+Recomendação: faça um backup regularmente para não perder seus clientes.
+</div>
+
+</section>
+
+</main>
+
+
+<script>
+
+const KEY="controle_clientes_10dias";
+
+
+/* =========================
+   DATAS
+========================= */
+
+function hoje(){
+
+const d=new Date();
+
+return new Date(
+d.getFullYear(),
+d.getMonth(),
+d.getDate()
+);
+
+}
+
+
+function iso(d){
+
+const ano=d.getFullYear();
+
+const mes=String(d.getMonth()+1).padStart(2,"0");
+
+const dia=String(d.getDate()).padStart(2,"0");
+
+return `${ano}-${mes}-${dia}`;
+
+}
+
+
+function dataBR(s){
+
+if(!s)return "-";
+
+const [a,m,d]=s.split("-");
+
+return `${d}/${m}/${a}`;
+
+}
+
+
+function dataObjeto(s){
+
+const [a,m,d]=s.split("-").map(Number);
+
+return new Date(a,m-1,d);
+
+}
+
+
+function vencimento(dataCadastro){
+
+const x=dataObjeto(dataCadastro);
+
+x.setDate(x.getDate()+10);
+
+return iso(x);
+
+}
+
+
+function diferencaDias(a,b){
+
+const ms=24*60*60*1000;
+
+return Math.round((b-a)/ms);
+
+}
+
+
+/* =========================
+   STORAGE
+========================= */
+
+function carregar(){
+
+try{
+
+return JSON.parse(
+localStorage.getItem(KEY)
+)||[];
+
+}catch(e){
+
+return[];
+
+}
+
+}
+
+
+function salvar(lista){
+
+localStorage.setItem(
+KEY,
+JSON.stringify(lista)
+);
+
+}
+
+
+/* =========================
+   DINHEIRO
+========================= */
+
+function converterValor(valor){
+
+if(!valor)return 0;
+
+let v=valor
+.toString()
+.replace(/[R$\s]/g,"")
+.replace(/\./g,"")
+.replace(",", ".");
+
+const numero=parseFloat(v);
+
+return isNaN(numero)?0:numero;
+
+}
+
+
+function dinheiro(valor){
+
+return Number(valor||0).toLocaleString(
+"pt-BR",
+{
+style:"currency",
+currency:"BRL"
+}
+);
+
+}
+
+
+/* =========================
+   CADASTRAR
+========================= */
+
+function cadastrar(){
+
+const el=document.getElementById("codigo");
+
+const valorEl=document.getElementById("valor");
+
+const codigo=el.value.trim();
+
+const valor=converterValor(valorEl.value);
+
+
+if(!/^\d{4}$/.test(codigo)){
+
+alert("Digite exatamente 4 números.");
+
+el.focus();
+
+return;
+
+}
+
+
+if(valor<=0){
+
+alert("Digite quanto o cliente pagou.");
+
+valorEl.focus();
+
+return;
+
+}
+
+
+const lista=carregar();
+
+
+if(lista.some(x=>x.codigo===codigo)){
+
+alert("Esse código já está cadastrado.");
+
+el.focus();
+
+return;
+
+}
+
+
+const cadastro=iso(hoje());
+
+
+lista.push({
+
+codigo:codigo,
+
+valor:valor,
+
+cadastro:cadastro,
+
+vencimento:vencimento(cadastro),
+
+status:"ativo",
+
+conclusao:null
+
+});
+
+
+salvar(lista);
+
+
+el.value="";
+
+valorEl.value="";
+
+
+render();
+
+}
+
+
+/* =========================
+   CONCLUIR
+========================= */
+
+function concluir(codigo){
+
+const lista=carregar();
+
+const cliente=lista.find(
+x=>x.codigo===codigo
+);
+
+if(!cliente)return;
+
+
+if(!confirm(
+"Marcar o cliente "+codigo+" como concluído?"
+))return;
+
+
+cliente.status="concluido";
+
+cliente.conclusao=iso(hoje());
+
+
+salvar(lista);
+
+render();
+
+}
+
+
+/* =========================
+   EXCLUIR
+========================= */
+
+function excluir(codigo){
+
+if(!confirm(
+"Excluir o cliente "+codigo+"?"
+))return;
+
+
+salvar(
+carregar().filter(
+x=>x.codigo!==codigo
+)
+);
+
+
+render();
+
+}
+
+
+/* =========================
+   SEMANA
+========================= */
+
+function inicioSemana(){
+
+const d=hoje();
+
+const dia=d.getDay();
+
+const diferenca=dia===0?6:dia-1;
+
+d.setDate(
+d.getDate()-diferenca
+);
+
+return d;
+
+}
+
+
+function mesmoMes(data){
+
+const d=dataObjeto(data);
+
+const h=hoje();
+
+return d.getMonth()===h.getMonth()
+&&
+d.getFullYear()===h.getFullYear();
+
+}
+
+
+function mesmaData(data1,data2){
+
+return data1===data2;
+
+}
+
+
+/* =========================
+   ANÁLISES
+========================= */
+
+function atualizarAnalises(lista){
+
+const hojeISO=iso(hoje());
+
+const inicioSem=iso(inicioSemana());
+
+const inicioMes=new Date(
+hoje().getFullYear(),
+hoje().getMonth(),
+1
+);
+
+
+const clientesHoje=lista.filter(
+x=>x.cadastro===hojeISO
+);
+
+
+const clientesSemana=lista.filter(
+x=>x.cadastro>=inicioSem
+&&
+x.cadastro<=hojeISO
+);
+
+
+const clientesMes=lista.filter(
+x=>mesmoMes(x.cadastro)
+);
+
+
+document.getElementById(
+"clientesHoje"
+).textContent=clientesHoje.length;
+
+
+document.getElementById(
+"clientesSemana"
+).textContent=clientesSemana.length;
+
+
+document.getElementById(
+"clientesMes"
+).textContent=clientesMes.length;
+
+
+/* DIAS DO MÊS */
+
+const dias={};
+
+clientesMes.forEach(x=>{
+
+const dia=x.cadastro.slice(8,10);
+
+dias[dia]=(dias[dia]||0)+1;
+
+});
+
+
+let melhor="-";
+
+let pior="-";
+
+let maior=0;
+
+let menor=Infinity;
+
+
+Object.keys(dias).forEach(dia=>{
+
+if(dias[dia]>maior){
+
+maior=dias[dia];
+
+melhor=`${dia} (${dias[dia]})`;
+
+}
+
+if(dias[dia]<menor){
+
+menor=dias[dia];
+
+pior=`${dia} (${dias[dia]})`;
+
+}
+
+});
+
+
+/* Se houver apenas dias com clientes,
+   o pior é o menor entre eles */
+
+document.getElementById(
+"melhorDia"
+).textContent=melhor;
+
+
+document.getElementById(
+"piorDia"
+).textContent=pior;
+
+
+/* MÉDIA */
+
+const diasPassados=hoje().getDate();
+
+const media=
+diasPassados>0
+?
+(clientesMes.length/diasPassados).toFixed(1)
+:
+"0";
+
+
+document.getElementById(
+"mediaDia"
+).textContent=media;
+
+}
+
+
+/* =========================
+   FINANCEIRO
+========================= */
+
+function atualizarFinanceiro(lista){
+
+const hojeISO=iso(hoje());
+
+const inicioSem=iso(inicioSemana());
+
+
+let total=0;
+
+let totalHoje=0;
+
+let totalSemana=0;
+
+let totalMes=0;
+
+
+lista.forEach(x=>{
+
+const valor=Number(x.valor)||0;
+
+total+=valor;
+
+
+if(x.cadastro===hojeISO){
+
+totalHoje+=valor;
+
+}
+
+
+if(x.cadastro>=inicioSem){
+
+totalSemana+=valor;
+
+}
+
+
+if(mesmoMes(x.cadastro)){
+
+totalMes+=valor;
+
+}
+
+});
+
+
+document.getElementById(
+"totalGeral"
+).textContent=dinheiro(total);
+
+
+document.getElementById(
+"valorHoje"
+).textContent=dinheiro(totalHoje);
+
+
+document.getElementById(
+"valorSemana"
+).textContent=dinheiro(totalSemana);
+
+
+document.getElementById(
+"valorMes"
+).textContent=dinheiro(totalMes);
+
+
+document.getElementById(
+"totalClientes"
+).textContent=lista.length;
+
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function render(){
+
+const lista=carregar();
+
+const agora=hoje();
+
+
+const ativos=[];
+
+const atrasados=[];
+
+const concluidos=[];
+
+
+lista.forEach(x=>{
+
+if(x.status==="concluido"){
+
+concluidos.push(x);
+
+return;
+
+}
+
+
+const v=dataObjeto(x.vencimento);
+
+
+if(agora>=v){
+
+atrasados.push({
+
+...x,
+
+dias:diferencaDias(v,agora)
+
+});
+
+}else{
+
+ativos.push({
+
+...x,
+
+dias:diferencaDias(agora,v)
+
+});
+
+}
+
+});
+
+
+document.getElementById(
+"countAtivos"
+).textContent=`(${ativos.length})`;
+
+
+document.getElementById(
+"countAtrasados"
+).textContent=`(${atrasados.length})`;
+
+
+document.getElementById(
+"countConcluidos"
+).textContent=`(${concluidos.length})`;
+
+
+/* ATIVOS */
+
+document.getElementById("ativos").innerHTML=
+
+ativos.length
+
+?
+
+ativos.map(x=>`
+
+<div class="item">
+
+<div>
+
+<div class="code">${x.codigo}</div>
+
+<div class="meta">
+Cadastro: ${dataBR(x.cadastro)}
+<br>
+Vencimento: ${dataBR(x.vencimento)}
+<br>
+Pago: <strong>${dinheiro(x.valor)}</strong>
+</div>
+
+<button
+class="complete"
+onclick="concluir('${x.codigo}')">
+CONCLUIR
+</button>
+
+<button
+class="delete"
+onclick="excluir('${x.codigo}')">
+EXCLUIR
+</button>
+
+</div>
+
+<div class="badge">
+
+${x.dias}
+${x.dias===1?"dia":"dias"}
+restante${x.dias===1?"":"s"}
+
+</div>
+
+</div>
+
+`).join("")
+
+:
+
+`<div class="empty">
+Nenhum cliente ativo.
+</div>`;
+
+
+/* ATRASADOS */
+
+document.getElementById("atrasados").innerHTML=
+
+atrasados.length
+
+?
+
+atrasados.map(x=>`
+
+<div class="item late">
+
+<div>
+
+<div class="code">${x.codigo}</div>
+
+<div class="meta">
+Cadastro: ${dataBR(x.cadastro)}
+<br>
+Venceu: ${dataBR(x.vencimento)}
+<br>
+Pago: <strong>${dinheiro(x.valor)}</strong>
+</div>
+
+<button
+class="complete"
+onclick="concluir('${x.codigo}')">
+CONCLUIR
+</button>
+
+<button
+class="delete"
+onclick="excluir('${x.codigo}')">
+EXCLUIR
+</button>
+
+</div>
+
+<div class="badge">
+
+${x.dias}
+${x.dias===1?"dia":"dias"}
+atrasado${x.dias===1?"":"s"}
+
+</div>
+
+</div>
+
+`).join("")
+
+:
+
+`<div class="empty">
+Nenhum cliente atrasado.
+</div>`;
+
+
+/* CONCLUÍDOS */
+
+document.getElementById("concluidos").innerHTML=
+
+concluidos.length
+
+?
+
+concluidos.map(x=>`
+
+<div class="item completed">
+
+<div>
+
+<div class="code">${x.codigo}</div>
+
+<div class="meta">
+Cadastro: ${dataBR(x.cadastro)}
+<br>
+Concluído: ${dataBR(x.conclusao)}
+<br>
+Pago: <strong>${dinheiro(x.valor)}</strong>
+</div>
+
+<button
+class="delete"
+onclick="excluir('${x.codigo}')">
+EXCLUIR
+</button>
+
+</div>
+
+<div class="badge">
+CONCLUÍDO
+</div>
+
+</div>
+
+`).join("")
+
+:
+
+`<div class="empty">
+Nenhum cliente concluído.
+</div>`;
+
+
+atualizarFinanceiro(lista);
+
+atualizarAnalises(lista);
+
+}
+
+
+/* =========================
+   EXPORTAR EXCEL
+========================= */
+
+function exportarExcel(){
+
+const lista=carregar();
+
+if(!lista.length){
+
+alert("Não existem clientes para exportar.");
+
+return;
+
+}
+
+
+const dados=lista.map(x=>({
+
+"Código":x.codigo,
+
+"Valor pago":x.valor,
+
+"Data cadastro":dataBR(x.cadastro),
+
+"Vencimento":dataBR(x.vencimento),
+
+"Status":
+x.status==="concluido"
+?
+"Concluído"
+:
+(
+dataObjeto(x.vencimento)<=hoje()
+?
+"Atrasado"
+:
+"Ativo"
+),
+
+"Data conclusão":
+x.conclusao
+?
+dataBR(x.conclusao)
+:
+""
+
+}));
+
+
+const ws=XLSX.utils.json_to_sheet(dados);
+
+const wb=XLSX.utils.book_new();
+
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Clientes"
+);
+
+
+const nome=
+`clientes_${iso(hoje())}.xlsx`;
+
+
+XLSX.writeFile(wb,nome);
+
+}
+
+
+/* =========================
+   EXPORTAR BACKUP JSON
+========================= */
+
+function exportarBackup(){
+
+const lista=carregar();
+
+const dados={
+
+versao:1,
+
+exportadoEm:new Date().toISOString(),
+
+clientes:lista
+
+};
+
+
+const blob=new Blob(
+[
+JSON.stringify(dados,null,2)
+],
+{
+type:"application/json"
+}
+);
+
+
+const url=URL.createObjectURL(blob);
+
+const a=document.createElement("a");
+
+a.href=url;
+
+a.download=
+`backup_clientes_${iso(hoje())}.json`;
+
+a.click();
+
+URL.revokeObjectURL(url);
+
+}
+
+
+/* =========================
+   IMPORTAR BACKUP
+========================= */
+
+function importarBackup(event){
+
+const arquivo=event.target.files[0];
+
+if(!arquivo)return;
+
+
+const reader=new FileReader();
+
+
+reader.onload=function(e){
+
+try{
+
+const dados=JSON.parse(
+e.target.result
+);
+
+
+let clientes=dados.clientes||dados;
+
+
+if(!Array.isArray(clientes)){
+
+throw new Error();
+
+}
+
+
+if(!confirm(
+"Isso substituirá os dados atuais pelos dados do backup. Continuar?"
+)){
+
+event.target.value="";
+
+return;
+
+}
+
+
+salvar(clientes);
+
+render();
+
+alert(
+"Backup importado com sucesso!"
+);
+
+
+}catch(err){
+
+alert(
+"Esse arquivo não é um backup válido."
+);
+
+}
+
+
+event.target.value="";
+
+};
+
+
+reader.readAsText(arquivo);
+
+}
+
+
+/* =========================
+   INPUT CÓDIGO
+========================= */
+
+document.getElementById(
+"codigo"
+).addEventListener(
+"input",
+e=>{
+
+e.target.value=
+e.target.value
+.replace(/\D/g,"")
+.slice(0,4);
+
+});
+
+
+/* =========================
+   INPUT VALOR
+========================= */
+
+document.getElementById(
+"valor"
+).addEventListener(
+"input",
+e=>{
+
+let valor=e.target.value
+.replace(/[^\d,]/g,"");
+
+const partes=valor.split(",");
+
+if(partes.length>2){
+
+valor=
+partes[0]+","+partes.slice(1).join("");
+
+}
+
+e.target.value=valor;
+
+});
+
+
+/* =========================
+   ENTER
+========================= */
+
+document.getElementById(
+"codigo"
+).addEventListener(
+"keydown",
+e=>{
+
+if(e.key==="Enter"){
+
+document.getElementById(
+"valor"
+).focus();
+
+}
+
+});
+
+
+document.getElementById(
+"valor"
+).addEventListener(
+"keydown",
+e=>{
+
+if(e.key==="Enter"){
+
+cadastrar();
+
+}
+
+});
+
+
+/* =========================
+   INICIALIZAÇÃO
+========================= */
+
+render();
+
+</script>
+
+</body>
+</html>
