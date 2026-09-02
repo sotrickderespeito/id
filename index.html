@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f5f5f7">
+<title>SóTrickDeRespeito — Controle</title>
+<link rel="icon" href="favicon.ico">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f5f7;color:#111;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}.menuBtn{position:fixed;z-index:20;left:14px;top:14px;border:0;border-radius:13px;background:#111;color:#fff;width:44px;height:44px;font-size:22px}
+aside{position:fixed;z-index:19;left:-285px;top:0;width:270px;height:100vh;background:#fff;padding:78px 16px 20px;transition:.22s;box-shadow:3px 0 20px #0002}aside.open{left:0}
+.overlay{display:none;position:fixed;inset:0;background:#0006;z-index:18}.overlay.show{display:block}
+.nav{width:100%;border:0;border-radius:12px;padding:13px;margin:5px 0;background:#f1f1f3;text-align:left;font-weight:800}.nav.active{background:#111;color:#fff}
+main{max-width:760px;margin:auto;padding:76px 15px 45px}.page{display:none}.page.active{display:block}
+h1{font-size:30px;margin:0 0 16px}h2{font-size:18px;margin:0 0 12px}.card{background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 2px 12px #0000000b}
+.hero{background:#111;color:#fff}.muted{color:#777;font-size:12px}.hero .muted{color:#aaa}.big{font-size:34px;font-weight:900;margin:4px 0 15px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{padding:12px;border-radius:13px;background:#f2f2f4}.hero .stat{background:#1d1d1f}.stat small{display:block;color:#777;font-size:10px}.hero .stat small{color:#aaa}.stat b{font-size:20px}
+label{display:block;font-size:12px;font-weight:800;color:#666;margin-top:11px}input,select{width:100%;padding:12px;border:1px solid #d8d8dd;border-radius:11px;background:#fff;outline:0;margin-top:6px}input:focus,select:focus{border-color:#111}
+button.primary{width:100%;border:0;border-radius:11px;padding:13px;background:#111;color:#fff;font-weight:900;margin-top:11px}.secondary{border:0;border-radius:9px;padding:8px 10px;background:#eee;font-weight:800}.danger{background:#fff0f0;color:#a51d18}
+.search{position:relative;margin-bottom:10px}.search input{margin:0;padding-left:37px}.search span{position:absolute;left:13px;top:10px;color:#777}
+.sectionHead{display:flex;justify-content:space-between;align-items:center}.count{font-size:12px;color:#777}
+.item{border:1px solid #e4e4e8;border-radius:13px;padding:12px;margin:8px 0}.row{display:flex;justify-content:space-between;gap:10px}.code{font-size:19px;font-weight:900;letter-spacing:2px}.meta{font-size:11px;color:#666;line-height:1.55;margin-top:4px}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.badge{display:inline-block;padding:5px 8px;border-radius:99px;background:#edf7ec;color:#2c732c;font-size:10px;font-weight:900;margin-top:7px}.late .badge{background:#fff0f0;color:#b3261e}.soon .badge{background:#fff7dc;color:#805700}.completed .badge{background:#eef0ff;color:#3849a8}
+.empty{text-align:center;color:#777;font-size:12px;padding:12px}.notice{background:#fff7dc;border-radius:13px;padding:11px;margin:7px 0}.notice b{display:block}
+.tabs{display:flex;gap:7px;overflow:auto;margin-bottom:10px}.tab{white-space:nowrap;border:0;border-radius:99px;padding:8px 11px;background:#eee;font-size:11px;font-weight:900}.tab.active{background:#111;color:#fff}
+.calendarHead{display:flex;justify-content:space-between;align-items:center;gap:8px}.calNav{display:flex;gap:5px}.calNav button{border:0;border-radius:9px;background:#eee;padding:9px}.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.week{margin:13px 0 4px}.week div{text-align:center;font-size:9px;color:#777;font-weight:900}.day{min-height:63px;border-radius:10px;background:#f2f2f4;padding:6px;font-size:11px}.day.sales{background:#111;color:#fff}.day.today{outline:2px solid #111}.day.empty{background:transparent}.day b{font-size:12px}.day small{display:block;font-size:8px;line-height:1.35;margin-top:4px}
+.chart{height:170px;display:flex;align-items:flex-end;gap:3px;border-bottom:1px solid #ddd;padding-top:22px}.bar{flex:1;background:#111;border-radius:4px 4px 0 0;min-width:2px;position:relative}.bar i{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-style:normal;font-size:8px;color:#666}
+.modalBg{position:fixed;z-index:50;inset:0;background:#0007;display:none;align-items:flex-end}.modalBg.show{display:flex}.modal{background:#fff;width:min(760px,100%);max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:17px}.modalHead{display:flex;justify-content:space-between;align-items:center}.close{border:0;background:#eee;border-radius:50%;width:36px;height:36px}
+.export{display:grid;grid-template-columns:1fr 1fr;gap:8px}.export button,.fileLabel{border:0;border-radius:11px;padding:12px;background:#eee;font-weight:900;text-align:center}.fileLabel{display:block;background:#111;color:#fff;margin-top:8px}.file{display:none}
+.toast{position:fixed;z-index:100;left:50%;bottom:18px;transform:translate(-50%,20px);opacity:0;background:#111;color:#fff;border-radius:11px;padding:10px 14px;font-size:12px;font-weight:800;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:620px){.grid4{grid-template-columns:1fr 1fr}.row{display:block}.day{min-height:55px}}
+</style>
+</head>
+<body>
+<button class="menuBtn" onclick="toggleMenu()">☰</button><div id="overlay" class="overlay" onclick="closeMenu()"></div>
+<aside id="side">
+<h2 style="margin-bottom:20px">Controle</h2>
+<button class="nav active" onclick="page('inicio',this)">Início</button>
+<button class="nav" onclick="page('clientes',this)">Clientes</button>
+<button class="nav" onclick="page('financeiro',this)">Financeiro</button>
+<button class="nav" onclick="page('calendario',this)">Calendário</button>
+<button class="nav" onclick="page('analises',this)">Análises</button>
+<button class="nav" onclick="page('backup',this)">Backup</button>
+</aside>
+
+<main>
+<section id="inicio" class="page active">
+<h1>SóTrickDeRespeito</h1>
+<div class="card hero"><div class="muted">Hoje</div><div class="big" id="dHoje">R$ 0,00</div><div class="grid4">
+<div class="stat"><small>CLIENTES</small><b id="dCHoje">0</b></div><div class="stat"><small>VENCENDO</small><b id="dBreve">0</b></div><div class="stat"><small>ATRASADOS</small><b id="dAtrasados">0</b></div><div class="stat"><small>TOTAL</small><b id="dTotal">0</b></div>
+</div></div>
+
+<div class="card"><h2>Novo G'</h2><label>Código (4 números)</label><input id="codigo" maxlength="4" inputmode="numeric" placeholder="0000"><label>Valor pago</label><input id="valor" inputmode="decimal" placeholder="R$ 20,00"><button class="primary" onclick="cadastrar()">CADASTRAR</button></div>
+
+<div class="card"><div class="sectionHead"><h2>⚠️ Vence em breve</h2><span class="count" id="cBreve">0</span></div><div id="breve"></div></div>
+<div class="card"><div class="sectionHead"><h2>🟢 Ativos</h2><span class="count" id="cAtivos">0</span></div><div class="search"><span>⌕</span><input id="qInicio" oninput="render()" placeholder="Pesquisar código..."></div><div id="ativos"></div></div>
+<div class="card"><div class="sectionHead"><h2>🔴 Atrasados</h2><span class="count" id="cAtrasados">0</span></div><div id="atrasados"></div></div>
+<div class="card"><div class="sectionHead"><h2>🔵 Concluídos</h2><span class="count" id="cConcluidos">0</span></div><div id="concluidos"></div></div>
+</section>
+
+<section id="clientes" class="page"><h1>Clientes</h1><div class="card"><div class="search"><span>⌕</span><input id="qClientes" oninput="renderClientes()" placeholder="Pesquisar código..."></div>
+<div class="tabs"><button class="tab active" onclick="setFiltro('todos',this)">Todos</button><button class="tab" onclick="setFiltro('ativos',this)">Ativos</button><button class="tab" onclick="setFiltro('breve',this)">Vencendo</button><button class="tab" onclick="setFiltro('atrasados',this)">Atrasados</button><button class="tab" onclick="setFiltro('concluidos',this)">Concluídos</button></div>
+<div id="listaClientes"></div></div></section>
+
+<section id="financeiro" class="page"><h1>Financeiro</h1><div class="card hero"><div class="muted">Total geral</div><div class="big" id="fTotal">R$ 0,00</div><div class="grid2">
+<div class="stat"><small>HOJE</small><b id="fHoje">R$ 0,00</b></div><div class="stat"><small>SEMANA</small><b id="fSemana">R$ 0,00</b></div><div class="stat"><small>MÊS</small><b id="fMes">R$ 0,00</b></div><div class="stat"><small>CLIENTES</small><b id="fClientes">0</b></div>
+</div></div><div class="card"><h2>Indicadores</h2><div class="grid2"><div class="stat"><small>TICKET MÉDIO</small><b id="ticket">R$ 0,00</b></div><div class="stat"><small>MÉDIA/DIA</small><b id="mediaValor">R$ 0,00</b></div></div></div></section>
+
+<section id="calendario" class="page"><h1>Calendário</h1><div class="card"><div class="calendarHead"><b id="calTitle"></b><div class="calNav"><button onclick="changeMonth(-1)">‹</button><button onclick="todayCal()">Hoje</button><button onclick="changeMonth(1)">›</button></div></div>
+<div class="week"><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div><div>DOM</div></div><div id="days" class="days"></div><div id="dayDetail" style="margin-top:14px"></div></div></section>
+
+<section id="analises" class="page"><h1>Análises</h1>
+<div class="card"><div class="calendarHead"><b id="rmTitle"></b><div class="calNav"><button onclick="rmAnterior()">‹</button><button onclick="rmAtual()">Mês atual</button><button onclick="rmSeguinte()">›</button></div></div>
+<div class="grid4" style="margin-top:12px"><div class="stat"><small>CLIENTES</small><b id="rmClientes">0</b></div><div class="stat"><small>CONCLUÍDOS</small><b id="rmConcluidos">0</b></div><div class="stat"><small>ATRASADOS</small><b id="rmAtrasados">0</b></div><div class="stat"><small>TOTAL R$</small><b id="rmTotal">R$ 0,00</b></div></div>
+<div class="grid2" style="margin-top:9px"><div class="stat"><small>MELHOR DIA</small><b id="rmMelhor">—</b></div><div class="stat"><small>PIOR DIA</small><b id="rmPior">—</b></div></div>
+<div class="stat" style="margin-top:9px"><small>MÉDIA DIÁRIA NO MÊS</small><b id="rmMedia">R$ 0,00</b></div>
+<div class="muted" style="margin-top:9px">Atrasados = clientes com vencimento neste mês ainda não pagos até hoje. Meses futuros não mostram melhor/pior dia nem média.</div>
+</div>
+<div class="card"><div class="grid4"><div class="stat"><small>HOJE</small><b id="aHoje">0</b></div><div class="stat"><small>SEMANA</small><b id="aSemana">0</b></div><div class="stat"><small>MÊS</small><b id="aMes">0</b></div><div class="stat"><small>MÉDIA/DIA</small><b id="aMedia">0</b></div></div></div>
+<div class="card"><h2>Clientes por dia — mês atual</h2><div id="chart" class="chart"></div><div class="muted">Dias futuros não entram no cálculo de melhor/pior dia.</div></div>
+<div class="card"><div class="grid2"><div class="stat"><small>MELHOR DIA</small><b id="melhor">—</b></div><div class="stat"><small>PIOR DIA</small><b id="pior">—</b></div></div></div></section>
+
+<section id="backup" class="page"><h1>Backup</h1><div class="card"><h2>Dados</h2><p class="muted">O backup salva clientes e histórico. Antes de importar, o sistema mostra quantos registros serão substituídos.</p><div class="export"><button onclick="excel()">EXPORTAR EXCEL</button><button onclick="backup()">BAIXAR JSON</button></div><label class="fileLabel" for="file">IMPORTAR JSON</label><input id="file" class="file" type="file" accept=".json" onchange="restore(event)"></div>
+<div class="card"><h2>Vence em breve</h2><label>Mostrar clientes que vencem nos próximos dias</label><select id="janela" onchange="render()"><option value="3">3 dias</option><option value="5">5 dias</option><option value="7" selected>7 dias</option></select></div></section>
+</main>
+
+<div id="modalBg" class="modalBg" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modalHead"><strong id="modalTitle"></strong><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const KEY="controle_clientes_10dias",APP_VERSION=4;
+let filtro="todos",calY=new Date().getFullYear(),calM=new Date().getMonth(),rmY=new Date().getFullYear(),rmM=new Date().getMonth();
+
+const meses=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const $=id=>document.getElementById(id);
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const today=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())};
+function obj(s){if(!s)return null;const p=String(s).slice(0,10).split("-").map(Number);return p.length===3&&!p.some(isNaN)?new Date(p[0],p[1]-1,p[2]):null}
+function br(s){if(!s)return"-";const p=String(s).slice(0,10).split("-");return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:s}
+function money(v){return Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function val(v){if(typeof v==="number")return v;let s=String(v??"").replace(/[R$\s]/g,"");if(s.includes(","))s=s.replace(/\./g,"").replace(",",".");return Number(s)||0}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function addDays(s,n){const d=obj(s);if(!d)return null;d.setDate(d.getDate()+n);return iso(d)}
+function daysUntil(s){return Math.round((obj(s)-today())/86400000)}
+function weekStart(){const d=today(),w=d.getDay()||7;d.setDate(d.getDate()-w+1);return d}
+function status(x){if(x.status==="concluido"||x.status==="concluído")return"concluido";return obj(x.vencimento)<=today()?"atrasado":"ativo"}
+function soon(x){const n=Number($("janela")?.value||7),d=daysUntil(x.vencimento);return status(x)==="ativo"&&d>=0&&d<=n}
+
+function normalize(raw){
+  if(!Array.isArray(raw))return[];
+  return raw.map((x,i)=>{
+    const codigo=String(x.codigo??x.code??x.id??"").replace(/\D/g,"").slice(-4).padStart(4,"0");
+    const cadastro=x.cadastro||x.data||x.dataCadastro||x.date||iso(today());
+    const valor=val(x.valor??x.valorPago??x.pagamento??x.amount??0);
+    const venc=x.vencimento||x.vencimentoData||x.dataVencimento||addDays(cadastro,10);
+    let historico=Array.isArray(x.historico)?x.historico:(
+      Array.isArray(x.pagamentos)?x.pagamentos.map(p=>({data:p.data||p.date||cadastro,valor:val(p.valor??p.amount)})):[]
+    );
+    if(!historico.length&&valor)historico=[{data:cadastro,valor}];
+    return {codigo,valor,cadastro,vencimento:venc,status:x.status==="concluido"||x.status==="concluído"?"concluido":(x.status||"ativo"),conclusao:x.conclusao||x.dataConclusao||null,historico};
+  }).filter(x=>x.codigo&&x.codigo.length===4);
+}
+function load(){try{return normalize(JSON.parse(localStorage.getItem(KEY)||"[]"))}catch(e){return[]}}
+function save(a){localStorage.setItem(KEY,JSON.stringify(a))}
+
+function toast(s){$("toast").textContent=s;$("toast").classList.add("show");clearTimeout(window.tt);window.tt=setTimeout(()=>$("toast").classList.remove("show"),2200)}
+function toggleMenu(){$("side").classList.toggle("open");$("overlay").classList.toggle("show")}
+function closeMenu(){$("side").classList.remove("open");$("overlay").classList.remove("show")}
+function page(id,b){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll(".nav").forEach(x=>x.classList.remove("active"));b.classList.add("active");closeMenu();if(id==="calendario")renderCal();if(id==="clientes")renderClientes()}
+
+function cadastro(){
+ const c=$("codigo").value.trim(),v=val($("valor").value);if(!/^\d{4}$/.test(c))return alert("O código precisa ter exatamente 4 números.");if(v<=0)return alert("Digite um valor maior que zero.");
+ const a=load();if(a.some(x=>x.codigo===c))return alert("Esse código já está cadastrado.");
+ const d=iso(today());a.push({codigo:c,valor:v,cadastro:d,vencimento:addDays(d,10),status:"ativo",conclusao:null,historico:[{data:d,valor:v}]});save(a);$("codigo").value="";$("valor").value="";render();toast("Cliente cadastrado.");
+}
+const cadastrar=cadastro;
+
+function card(x){
+ const s=status(x),n=daysUntil(x.vencimento),b=s==="concluido"?"CONCLUÍDO":s==="atrasado"?`${Math.abs(n)} ${Math.abs(n)===1?"dia":"dias"} atrasado${Math.abs(n)===1?"":"s"}`:n===0?"VENCE HOJE":`${n} ${n===1?"dia":"dias"} restantes`;
+ const cl=s==="concluido"?"completed":s==="atrasado"?"late":soon(x)?"soon":"";
+ return `<div class="item ${cl}"><div class="row"><div><div class="code">${esc(x.codigo)}</div><div class="meta">Cadastro: ${br(x.cadastro)}<br>Vencimento: ${br(x.vencimento)}<br>Valor atual: <b>${money(x.valor)}</b></div></div><span class="badge">${b}</span></div><div class="actions"><button class="secondary" onclick="edit('${esc(x.codigo)}')">EDITAR</button><button class="secondary" onclick="payment('${esc(x.codigo)}')">NOVO PAGAMENTO</button><button class="secondary" onclick="history('${esc(x.codigo)}')">HISTÓRICO</button>${s!=="concluido"?`<button class="secondary" onclick="complete('${esc(x.codigo)}')">CONCLUIR</button>`:""}<button class="secondary danger" onclick="removeClient('${esc(x.codigo)}')">EXCLUIR</button></div></div>`;
+}
+function render(){
+ const a=load(),h=iso(today()),ws=iso(weekStart()),q=($("qInicio")?.value||"").trim(),f=x=>!q||x.codigo.includes(q),ativos=a.filter(x=>status(x)==="ativo"),atras=a.filter(x=>status(x)==="atrasado"),conc=a.filter(x=>status(x)==="concluido"),brv=ativos.filter(soon);
+ $("cAtivos").textContent=ativos.length;$("cAtrasados").textContent=atras.length;$("cConcluidos").textContent=conc.length;$("cBreve").textContent=brv.length;
+ const hoje=a.filter(x=>x.cadastro===h),sem=a.filter(x=>x.cadastro>=ws&&x.cadastro<=h),mes=a.filter(x=>x.cadastro.startsWith(h.slice(0,7))),vh=hoje.reduce((z,x)=>z+x.valor,0),vm=mes.reduce((z,x)=>z+x.valor,0);
+ $("dHoje").textContent=money(vh);$("dCHoje").textContent=hoje.length;$("dBreve").textContent=brv.length;$("dAtrasados").textContent=atras.length;$("dTotal").textContent=a.length;
+ $("ativos").innerHTML=ativos.filter(f).map(card).join("")||'<div class="empty">Nenhum cliente ativo.</div>';
+ $("atrasados").innerHTML=atras.filter(f).map(card).join("")||'<div class="empty">Nenhum cliente atrasado.</div>';
+ $("concluidos").innerHTML=conc.slice().reverse().filter(f).map(card).join("")||'<div class="empty">Nenhum cliente concluído.</div>';
+ $("breve").innerHTML=brv.map(card).join("")||'<div class="empty">Nenhum cliente vencendo no período selecionado.</div>';
+ $("fTotal").textContent=money(a.reduce((z,x)=>z+x.valor,0));$("fHoje").textContent=money(vh);$("fSemana").textContent=money(sem.reduce((z,x)=>z+x.valor,0));$("fMes").textContent=money(vm);$("fClientes").textContent=a.length;$("ticket").textContent=money(a.length?a.reduce((z,x)=>z+x.valor,0)/a.length:0);$("mediaValor").textContent=money(today().getDate()?vm/today().getDate():0);
+ renderAnalises(a);renderResumoMensal();renderCal();renderClientes();
+}
+function renderClientes(){
+ const q=($("qClientes")?.value||"").trim(),a=load();let r=a;
+ if(filtro==="ativos")r=a.filter(x=>status(x)==="ativo");if(filtro==="breve")r=a.filter(soon);if(filtro==="atrasados")r=a.filter(x=>status(x)==="atrasado");if(filtro==="concluidos")r=a.filter(x=>status(x)==="concluido");
+ r=r.filter(x=>!q||x.codigo.includes(q));$("listaClientes").innerHTML=r.map(card).join("")||'<div class="empty">Nenhum cliente encontrado.</div>';
+}
+function setFiltro(f,b){filtro=f;document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderClientes()}
+
+function openModal(title,body){$("modalTitle").textContent=title;$("modalBody").innerHTML=body;$("modalBg").classList.add("show")}
+function closeModal(e){if(!e||e.target.id==="modalBg")$("modalBg").classList.remove("show")}
+
+function edit(c){
+ const x=load().find(a=>a.codigo===c);if(!x)return;
+ openModal("Editar cliente",`<label>Código</label><input id="ec" maxlength="4" inputmode="numeric" value="${esc(x.codigo)}"><label>Valor atual</label><input id="ev" inputmode="decimal" value="${String(x.valor).replace(".",",")}"><label>Data de cadastro</label><input id="ed" type="date" value="${x.cadastro}"><button class="primary" onclick="saveEdit('${esc(c)}')">SALVAR</button><p class="muted">Editar o valor atual não altera pagamentos antigos do histórico.</p>`);
+}
+function saveEdit(old){
+ const c=$("ec").value.trim(),v=val($("ev").value),d=$("ed").value,a=load();if(!/^\d{4}$/.test(c)||v<=0||!d)return alert("Preencha os dados corretamente.");if(c!==old&&a.some(x=>x.codigo===c))return alert("Esse código já existe.");
+ const x=a.find(z=>z.codigo===old);x.codigo=c;x.valor=v;x.cadastro=d;x.vencimento=addDays(d,10);save(a);closeModal();render();toast("Cliente atualizado.");
+}
+function payment(c){
+ const x=load().find(a=>a.codigo===c);if(!x)return;
+ openModal("Novo pagamento — "+c,`<label>Valor recebido</label><input id="pv" inputmode="decimal" value="${String(x.valor).replace(".",",")}"><label>Data</label><input id="pd" type="date" value="${iso(today())}"><button class="primary" onclick="savePayment('${esc(c)}')">REGISTRAR PAGAMENTO</button>`);
+}
+function savePayment(c){
+ const v=val($("pv").value),d=$("pd").value;if(v<=0||!d)return alert("Informe valor e data.");
+ const a=load(),x=a.find(z=>z.codigo===c);if(!x)return;
+ x.valor=v;x.cadastro=d;x.vencimento=addDays(d,10);x.status="ativo";x.conclusao=null;x.historico=Array.isArray(x.historico)?x.historico:[];x.historico.push({data:d,valor:v});save(a);closeModal();render();toast("Pagamento registrado.");
+}
+function history(c){
+ const x=load().find(a=>a.codigo===c);if(!x)return;const h=(x.historico||[]).slice().reverse();
+ openModal("Histórico — "+c,h.length?h.map(p=>`<div class="item"><div class="row"><div><b>${br(p.data)}</b><div class="meta">Pagamento</div></div><b>${money(p.valor)}</b></div></div>`).join(""):'<div class="empty">Sem pagamentos registrados.</div>');
+}
+function complete(c){if(!confirm(`Concluir o cliente ${c}?`))return;const a=load(),x=a.find(z=>z.codigo===c);x.status="concluido";x.conclusao=iso(today());save(a);render();toast("Cliente concluído.")}
+function removeClient(c){if(!confirm(`Excluir ${c}? Essa ação não pode ser desfeita.`))return;save(load().filter(x=>x.codigo!==c));render();toast("Cliente excluído.")}
+
+function aggregate(a){const m={};a.forEach(x=>{m[x.cadastro]=(m[x.cadastro]||0)+1});return m}
+function renderCal(){
+ const a=load(),idx=aggregate(a),first=new Date(calY,calM,1),last=new Date(calY,calM+1,0);$("calTitle").textContent=meses[calM]+" "+calY;
+ let start=first.getDay()||7;start--;let h="";for(let i=0;i<start;i++)h+='<div class="day empty"></div>';
+ for(let d=1;d<=last.getDate();d++){const s=`${calY}-${String(calM+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`,n=idx[s]||0;h+=`<div class="day ${n?"sales ":""}${s===iso(today())?"today":""}" onclick="dayDetail('${s}')"><b>${d}</b>${n?`<small>${n} cliente${n===1?"":"s"}<br>${money(a.filter(x=>x.cadastro===s).reduce((z,x)=>z+x.valor,0))}</small>`:""}</div>`}
+ $("days").innerHTML=h;
+}
+function dayDetail(s){const a=load().filter(x=>x.cadastro===s),total=a.reduce((z,x)=>z+x.valor,0);$("dayDetail").innerHTML=`<h2>${br(s)} — ${money(total)}</h2>${a.map(x=>`<div class="item"><div class="row"><div><div class="code">${esc(x.codigo)}</div><div class="meta">Pago: ${money(x.valor)}</div></div><button class="secondary" onclick="edit('${esc(x.codigo)}')">EDITAR</button></div></div>`).join("")||'<div class="empty">Nenhum cliente neste dia.</div>'}`}
+function changeMonth(n){calM+=n;if(calM<0){calM=11;calY--}if(calM>11){calM=0;calY++}renderCal()}
+function todayCal(){const d=today();calY=d.getFullYear();calM=d.getMonth();renderCal();dayDetail(iso(d))}
+
+function renderAnalises(a){
+ const h=iso(today()),ws=iso(weekStart()),mes=a.filter(x=>x.cadastro.startsWith(h.slice(0,7))),pastDays=today().getDate();
+ $("aHoje").textContent=a.filter(x=>x.cadastro===h).length;$("aSemana").textContent=a.filter(x=>x.cadastro>=ws&&x.cadastro<=h).length;$("aMes").textContent=mes.length;$("aMedia").textContent=(mes.length/pastDays).toFixed(1);
+ const days=new Date(today().getFullYear(),today().getMonth()+1,0).getDate(),vals=[];for(let d=1;d<=days;d++){const s=`${h.slice(0,7)}-${String(d).padStart(2,"0")}`;vals.push(mes.filter(x=>x.cadastro===s).length)}
+ const max=Math.max(...vals,1);$("chart").innerHTML=vals.map((n,i)=>`<div class="bar" style="height:${Math.max(2,n/max*100)}%" title="Dia ${i+1}: ${n}">${n?`<i>${n}</i>`:""}</div>`).join("");
+ const past=vals.slice(0,pastDays),best=Math.max(...past),worst=Math.min(...past),bi=past.indexOf(best),wi=past.indexOf(worst);$("melhor").textContent=best?`${String(bi+1).padStart(2,"0")} (${best})`:"—";$("pior").textContent=`${String(wi+1).padStart(2,"0")} (${worst})`;
+}
+
+function allPayments(a){const out=[];a.forEach(x=>(x.historico||[]).forEach(p=>out.push({data:p.data,valor:p.valor})));return out}
+function renderResumoMensal(){
+ const a=load(),ym=`${rmY}-${String(rmM+1).padStart(2,"0")}`;
+ $("rmTitle").textContent=meses[rmM]+" "+rmY;
+ const pagamentosMes=allPayments(a).filter(p=>p.data&&p.data.startsWith(ym));
+ const clientesMes=a.filter(x=>x.cadastro&&x.cadastro.startsWith(ym));
+ const concluidosMes=a.filter(x=>x.conclusao&&x.conclusao.startsWith(ym));
+ const atrasadosMes=a.filter(x=>x.vencimento&&x.vencimento.startsWith(ym)&&status(x)==="atrasado");
+ const totalMes=pagamentosMes.reduce((z,p)=>z+p.valor,0);
+ const diasNoMes=new Date(rmY,rmM+1,0).getDate();
+ const mesAlvo=new Date(rmY,rmM,1),mesHoje=new Date(today().getFullYear(),today().getMonth(),1);
+ const isFuturo=mesAlvo>mesHoje,isAtual=mesAlvo.getTime()===mesHoje.getTime();
+ const diasConsiderar=isFuturo?0:(isAtual?today().getDate():diasNoMes);
+ const porDia=[];for(let d=1;d<=diasConsiderar;d++){const s=`${ym}-${String(d).padStart(2,"0")}`;porDia.push(pagamentosMes.filter(p=>p.data===s).reduce((z,p)=>z+p.valor,0))}
+ const temDados=porDia.length>0,melhorV=temDados?Math.max(...porDia):0,piorV=temDados?Math.min(...porDia):0,melhorI=porDia.indexOf(melhorV),piorI=porDia.indexOf(piorV);
+ const media=diasConsiderar?totalMes/diasConsiderar:0;
+ $("rmClientes").textContent=clientesMes.length;$("rmConcluidos").textContent=concluidosMes.length;$("rmAtrasados").textContent=atrasadosMes.length;$("rmTotal").textContent=money(totalMes);
+ $("rmMelhor").textContent=temDados&&melhorV>0?`Dia ${String(melhorI+1).padStart(2,"0")} — ${money(melhorV)}`:"—";
+ $("rmPior").textContent=temDados?`Dia ${String(piorI+1).padStart(2,"0")} — ${money(piorV)}`:"—";
+ $("rmMedia").textContent=money(media);
+}
+function rmAnterior(){rmM--;if(rmM<0){rmM=11;rmY--}renderResumoMensal()}
+function rmSeguinte(){rmM++;if(rmM>11){rmM=0;rmY++}renderResumoMensal()}
+function rmAtual(){rmY=today().getFullYear();rmM=today().getMonth();renderResumoMensal()}
+
+function backup(){
+ const payload={app:"controle-clientes",version:APP_VERSION,exportadoEm:new Date().toISOString(),clientes:load()};
+ const b=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=`backup_clientes_${iso(today())}.json`;a.click();URL.revokeObjectURL(u);toast("Backup baixado.");
+}
+function restore(e){
+ const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const p=JSON.parse(ev.target.result),arr=normalize(p.clientes||p);if(!Array.isArray(arr))throw 0;if(!confirm(`O backup contém ${arr.length} clientes e substituirá os dados atuais (${load().length}). Continuar?`))return;save(arr);render();toast("Backup restaurado.")}catch(err){alert("Backup inválido.")}e.target.value=""};r.readAsText(file);
+}
+function excel(){
+ if(typeof XLSX==="undefined")return alert("A biblioteca do Excel não carregou. Verifique sua conexão com a internet.");
+ const a=load();if(!a.length)return alert("Não há clientes para exportar.");
+ const rows=a.map(x=>({"Código":x.codigo,"Valor atual":x.valor,"Cadastro":br(x.cadastro),"Vencimento":br(x.vencimento),"Status":status(x),"Conclusão":br(x.conclusao||""),"Histórico":(x.historico||[]).map(p=>`${br(p.data)} — ${money(p.valor)}`).join(" | ")}));
+ const ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Clientes");XLSX.writeFile(wb,`clientes_${iso(today())}.xlsx`);
+}
+$("codigo").addEventListener("input",e=>e.target.value=e.target.value.replace(/\D/g,"").slice(0,4));
+$("valor").addEventListener("input",e=>e.target.value=e.target.value.replace(/[^\d,]/g,""));
+$("codigo").addEventListener("keydown",e=>{if(e.key==="Enter")$("valor").focus()});
+$("valor").addEventListener("keydown",e=>{if(e.key==="Enter")cadastrar()});
+render();
+</script>
+</body>
+</html>
